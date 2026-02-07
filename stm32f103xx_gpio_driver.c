@@ -1,3 +1,9 @@
+/*
+ * stm32f103xx_gpio_driver.c
+ *
+ *  Created on: 10-Jan-2026
+ *      Author: sumit
+ */
 #include "stm32f103xx_gpio_driver.h"
 
 void GPIO_PeriClkControl(GPIO_REGDEF *pGPIOx, uint8_t EnOrDi) {
@@ -241,18 +247,238 @@ void GPIO_init(GPIO_HANDLER *pGPIOhandle) {
 		}
 	} else {
 		//interrupt code goes here
+		uint32_t bit0 = (pin % 4) * 4;
+		uint32_t bit1 = bit0 + 1;
+		uint32_t bit2 = bit1 + 1;
+		uint32_t bit3 = bit2 + 1;
+
+		//first clear all bits as per pin numbers
+		if (pin <= 3) { //names of the registers changes rest everything is same as it is
+			AFIO->AFIO_EXTICR1 &= ~((1 << bit0) | (1 << bit1) | (1 << bit2)
+					| (1 << bit3));
+
+		} else if (pin >= 4 && pin <= 7) {
+			AFIO->AFIO_EXTICR2 &= ~((1 << bit0) | (1 << bit1) | (1 << bit2)
+					| (1 << bit3));
+		} else if (pin >= 8 && pin <= 11) {
+			AFIO->AFIO_EXTICR3 &= ~((1 << bit0) | (1 << bit1) | (1 << bit2)
+					| (1 << bit3));
+		} else {
+			AFIO->AFIO_EXTICR4 &= ~((1 << bit0) | (1 << bit1) | (1 << bit2)
+					| (1 << bit3));
+		}
+		if (mode == GPIO_INTERRUPT_RT) {
+
+			//once everything is cleared now see which port to make as interrupt
+
+			if (pGPIOhandle->pGPIOx == GPIOA) {
+				//nothing to do since port A needs all 4bits to be zero
+
+				EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+				EXTI->EXTI_RTSR |= (1 << pin); //enables rising trigger for that EXTI line
+
+			} else if (pGPIOhandle->pGPIOx == GPIOB) {
+				if (pin <= 3) { //names of the registers changes rest everything is same as it is
+					AFIO->AFIO_EXTICR1 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+
+				} else if (pin >= 4 && pin <= 7) {
+					AFIO->AFIO_EXTICR2 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+
+				} else if (pin >= 8 && pin <= 11) {
+					AFIO->AFIO_EXTICR3 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+
+				} else {
+					AFIO->AFIO_EXTICR4 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+
+				}
+			}
+
+			else if (pGPIOhandle->pGPIOx == GPIOC) {
+				if (pin <= 3) { //names of the registers changes rest everything is same as it is
+					AFIO->AFIO_EXTICR1 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+
+				} else if (pin >= 4 && pin <= 7) {
+					AFIO->AFIO_EXTICR2 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+
+				} else if (pin >= 8 && pin <= 11) {
+					AFIO->AFIO_EXTICR3 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+
+				} else {
+					AFIO->AFIO_EXTICR4 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+
+				}
+			}
+
+		} else if (mode == GPIO_INTERRUPT_FT) {
+			if (pGPIOhandle->pGPIOx == GPIOA) {
+				//nothing to do since port A needs all 4bits to be zero
+
+				EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+				EXTI->EXTI_FTSR |= (1 << pin); //enables rising trigger for that EXTI line
+
+			} else if (pGPIOhandle->pGPIOx == GPIOB) {
+				if (pin <= 3) { //names of the registers changes rest everything is same as it is
+					AFIO->AFIO_EXTICR1 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else if (pin >= 4 && pin <= 7) {
+					AFIO->AFIO_EXTICR2 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else if (pin >= 8 && pin <= 11) {
+					AFIO->AFIO_EXTICR3 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else {
+					AFIO->AFIO_EXTICR4 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				}
+			}
+
+			else if (pGPIOhandle->pGPIOx == GPIOC) {
+				if (pin <= 3) { //names of the registers changes rest everything is same as it is
+					AFIO->AFIO_EXTICR1 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else if (pin >= 4 && pin <= 7) {
+					AFIO->AFIO_EXTICR2 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else if (pin >= 8 && pin <= 11) {
+					AFIO->AFIO_EXTICR3 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else {
+					AFIO->AFIO_EXTICR4 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				}
+			}
+
+		} else if (mode == GPIO_INTERRUPT_RFT) {
+			if (pGPIOhandle->pGPIOx == GPIOA) {
+				//nothing to do since port A needs all 4bits to be zero
+
+				EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+				EXTI->EXTI_RTSR |= (1 << pin); //enables rising trigger for that EXTI line
+				EXTI->EXTI_FTSR |= (1 << pin);
+
+			} else if (pGPIOhandle->pGPIOx == GPIOB) {
+				if (pin <= 3) { //names of the registers changes rest everything is same as it is
+					AFIO->AFIO_EXTICR1 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else if (pin >= 4 && pin <= 7) {
+					AFIO->AFIO_EXTICR2 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else if (pin >= 8 && pin <= 11) {
+					AFIO->AFIO_EXTICR3 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else {
+					AFIO->AFIO_EXTICR4 |= (1 << bit0);
+					//0001 for port B
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				}
+			}
+
+			else if (pGPIOhandle->pGPIOx == GPIOC) {
+				if (pin <= 3) { //names of the registers changes rest everything is same as it is
+					AFIO->AFIO_EXTICR1 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else if (pin >= 4 && pin <= 7) {
+					AFIO->AFIO_EXTICR2 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else if (pin >= 8 && pin <= 11) {
+					AFIO->AFIO_EXTICR3 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				} else {
+					AFIO->AFIO_EXTICR4 |= (1 << bit1);
+					//0010 for port C
+					EXTI->EXTI_IMR |= (1 << pin); //sets the bit of mask register to enable that specific EXTI line
+					EXTI->EXTI_RTSR |= (1 << pin);
+					EXTI->EXTI_FTSR |= (1 << pin);
+
+				}
+			}
+		}
+
 	}
 
 }
 void GPIO_deinit(GPIO_REGDEF *pGPIOx) {
 	// we want to pass the base addr of the port first then set the reset register of rcc
-	if(pGPIOx == GPIOA){
+	if (pGPIOx == GPIOA) {
 		GPIOA_REG_RESET();
-	}
-	else if(pGPIOx == GPIOB){
+	} else if (pGPIOx == GPIOB) {
 		GPIOB_REG_RESET();
-	}
-	else if(pGPIOx == GPIOC){
+	} else if (pGPIOx == GPIOC) {
 		GPIOC_REG_RESET();
 	}
 
@@ -262,7 +488,7 @@ void GPIO_deinit(GPIO_REGDEF *pGPIOx) {
 //PA0 to PA15 means total 16 pin in 1 port hence 16 bit integer
 
 uint8_t GPIO_ReadfromInputPin(GPIO_REGDEF *pGPIOx, uint8_t Pin_number) {
-	uint8_t value = ((pGPIOx->IDR)>>Pin_number) & 1; //shift right pin number times and then and with 1 to know whether its 0 or 1
+	uint8_t value = ((pGPIOx->IDR) >> Pin_number) & 1; //shift right pin number times and then and with 1 to know whether its 0 or 1
 	return value;
 }
 uint16_t GPIO_ReadfromInputPort(GPIO_REGDEF *pGPIOx) {
@@ -271,24 +497,59 @@ uint16_t GPIO_ReadfromInputPort(GPIO_REGDEF *pGPIOx) {
 
 void GPIO_WritetoOutputPin(GPIO_REGDEF *pGPIOx, uint8_t Pin_number,
 		uint8_t value) {
-	if(value == 1){
-		pGPIOx->ODR |= (1<<Pin_number);
-	}
-	else{
-		pGPIOx->ODR &= ~(1<<Pin_number);
+	if (value == 1) {
+		pGPIOx->ODR |= (1 << Pin_number);
+	} else {
+		pGPIOx->ODR &= ~(1 << Pin_number);
 	}
 }
-void GPIO_WritetoOutputPort(GPIO_REGDEF *pGPIOx, uint16_t val){
+void GPIO_WritetoOutputPort(GPIO_REGDEF *pGPIOx, uint16_t val) {
 	pGPIOx->ODR = val;
 }
 void GPIO_ToggleOutputPin(GPIO_REGDEF *pGPIOx, uint8_t Pin_number) {
-	pGPIOx->ODR ^= (1<<Pin_number); // this will toggle the state of the pin
+	pGPIOx->ODR ^= (1 << Pin_number); // this will toggle the state of the pin
 }
 
-void GPIO_IRQconfig(uint8_t IRQ_number, uint8_t priority, uint8_t EnorDi) {
+void GPIO_IRQconfig(uint8_t IRQ_number, uint8_t EnorDi) {
+	if (EnorDi == ENABLE) {
+		if (IRQ_number <= 31) {
+			//NVIC_ISER0 register
+			*NVIC_ISER0 |= (1 << IRQ_number);
+		} else if (IRQ_number > 31 && IRQ_number <= 63) {
+			//NVIC_ISER1 register
+			IRQ_number = IRQ_number % 32;
+			*NVIC_ISER1 |= (1 << IRQ_number);
+		}
+		//last IRQ number is 59 so no need to go to NVIC_ISER2
+
+	} else {
+		//assuming it is to disable the interrupt
+		if (IRQ_number <= 31) {
+			//NVIC_ICER0 register
+			*NVIC_ICER0 |= (1 << IRQ_number);
+		} else if (IRQ_number > 31 && IRQ_number <= 63) {
+			//NVIC_ICER1 register
+			IRQ_number = IRQ_number % 32;
+			*NVIC_ICER1 |= (1 << IRQ_number);
+		}
+		//last IRQ number is 59 so no need to go to NVIC_ICER2
+	}
+}
+
+void GPIO_IRQpriority(uint8_t IRQ_number, uint8_t priority) {
+	uint8_t IPRx = IRQ_number / 4;
+	uint8_t PRIx = IRQ_number % 4;
+//need to clear the bits before giving it priority
+	*(NVIC_IPR_BASEADDR + IPRx) &= ~((0xFF << PRIx * 8)); //0xff will clear that specific 8 bit space and after that we are alloting priority to that space
+
+	*(NVIC_IPR_BASEADDR + IPRx) |= ((priority << PRIx * 8) << 4); //correct addr of IPR reg and then since they consider only 4 MSB we need to shift the lsb to msb side
 
 }
+
 void GPIO_IRQhandling(uint8_t Pin_number) {
-
+	//disable the pending bit of exti_pr by writing 1 to it
+	if((EXTI->EXTI_PR & (1 << Pin_number)) > 0){
+		EXTI->EXTI_PR = (1 << Pin_number); //clearing the pending bit by setting it ,here cant perform bitwise or beacause other pending pins will also get reset due to this hence we use = operator
+	}
 }
 

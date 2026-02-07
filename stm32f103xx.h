@@ -1,3 +1,10 @@
+/*
+ * stm32f103xx.h
+ *
+ *  Created on: 08-Jan-2026
+ *      Author: sumit
+ */
+
 #ifndef INC_STM32F103XX_H_
 #define INC_STM32F103XX_H_
 #include<stdint.h>
@@ -29,6 +36,17 @@
 #define USART3_BASEADDR         0x40004800U
 #define EXTI_BASEADDR           0x40010400U
 #define AFIO_BASEADDR           APB2_BASEADDR
+
+
+#define NVIC_ISER0              (volatile uint32_t *)0xE000E100
+#define NVIC_ISER1              (volatile uint32_t *)0xE000E104
+
+#define NVIC_ICER0              (volatile uint32_t *)0XE000E180
+#define NVIC_ICER1              (volatile uint32_t *)0XE000E184
+
+
+#define NVIC_IPR_BASEADDR       (volatile uint32_t *)0xE000E400
+
 
 
 
@@ -69,9 +87,40 @@ typedef struct{
 }RCC_REG;
 
 
-#define RCC                     ((RCC_REG*)RCC_BASEADDR)
+typedef struct{
+	uint32_t EXTI_IMR;
+	uint32_t EXTI_EMR;
+	uint32_t EXTI_RTSR;
+	uint32_t EXTI_FTSR;
+	uint32_t EXTI_SWIER;
+	uint32_t EXTI_PR;
+}EXTI_REG;
 
-//using rcc regs now for GPIO peripherals
+typedef struct{
+	uint32_t AFIO_EVCR;
+	uint32_t AFIO_MAPR;
+	uint32_t AFIO_EXTICR1;
+	uint32_t AFIO_EXTICR2;
+	uint32_t AFIO_EXTICR3;
+	uint32_t AFIO_EXTICR4;
+	uint32_t AFIO_MAPR2;
+}AFIO_REG;
+
+
+#define RCC                     ((RCC_REG*)RCC_BASEADDR)
+#define EXTI                    ((EXTI_REG*)EXTI_BASEADDR)
+#define AFIO                    ((AFIO_REG*)AFIO_BASEADDR)
+
+
+#define IRQ_NO_EXTI0                6
+#define IRQ_NO_EXTI1				7
+#define IRQ_NO_EXTI2 				8
+#define IRQ_NO_EXTI3 				9
+#define IRQ_NO_EXTI4 				10
+#define IRQ_NO_EXTI9_5				23
+#define IRQ_NO_EXTI10_15			40
+
+
 
 #define GPIOA_PCLK_EN()       (RCC->RCC_APB2ENR |= (1<<2)) //enables the clk for GPIOA peripheral
 #define GPIOB_PCLK_EN()       (RCC->RCC_APB2ENR |= (1<<3))

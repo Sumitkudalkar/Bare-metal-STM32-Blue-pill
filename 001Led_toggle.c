@@ -1,3 +1,6 @@
+//hello world of embedded which toggles the LED on and off 
+
+
 #include "stm32f103xx_gpio_driver.h"
 
 void delay(void){
